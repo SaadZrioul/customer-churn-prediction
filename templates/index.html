@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application de prédiction du churn client basée sur un modèle de Machine Learning.">
+    <title>ChurnGuard AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-mark">CG</div>
+                <div>
+                    <h1>ChurnGuard</h1>
+                    <p>AI Decision Support</p>
+                </div>
+            </div>
+
+            <nav class="side-nav">
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </button>
+
+                <button class="nav-item" data-page="prediction">
+                    <span class="nav-icon">◎</span>
+                    <span>Prédiction</span>
+                </button>
+
+                <button class="nav-item" data-page="batch">
+                    <span class="nav-icon">⇧</span>
+                    <span>Scoring CSV</span>
+                </button>
+
+                <button class="nav-item" data-page="model">
+                    <span class="nav-icon">◫</span>
+                    <span>Modèle</span>
+                </button>
+
+                <button class="nav-item" data-page="about">
+                    <span class="nav-icon">i</span>
+                    <span>À propos</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-card">
+                <span class="status-dot"></span>
+                <div>
+                    <strong>Modèle opérationnel</strong>
+                    <small>Logistic Regression</small>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span>Threshold {{ "%.2f"|format(threshold) }}</span>
+                <span>v1.0</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <button class="mobile-menu" id="mobileMenu" aria-label="Ouvrir le menu">☰</button>
+
+                <div>
+                    <p class="eyebrow">CUSTOMER RETENTION PLATFORM</p>
+                    <h2 id="pageTitle">Dashboard</h2>
+                </div>
+
+                <div class="topbar-actions">
+                    <div class="api-status">
+                        <span class="status-dot"></span>
+                        API active
+                    </div>
+                    <button class="icon-button" id="themeToggle" aria-label="Changer le thème">☾</button>
+                </div>
+            </header>
+
+            <section class="page active" id="page-dashboard">
+                <div class="hero-card">
+                    <div class="hero-copy">
+                        <span class="badge">Machine Learning • Churn Prediction</span>
+                        <h3>Transformez le risque de churn en action.</h3>
+                        <p>
+                            ChurnGuard estime la probabilité qu'un client quitte l'entreprise,
+                            identifie les facteurs qui influencent le score et aide à prioriser
+                            les actions de rétention.
+                        </p>
+
+                        <div class="hero-actions">
+                            <button class="primary-btn" data-go="prediction">
+                                Analyser un client
+                                <span>→</span>
+                            </button>
+                            <button class="secondary-btn" data-go="model">
+                                Voir les performances
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <div class="orb orb-main">
+                            <span>ROC-AUC</span>
+                            <strong>{{ "%.3f"|format(metrics.roc_auc) }}</strong>
+                            <small>Bonne discrimination</small>
+                        </div>
+                        <div class="floating-chip chip-one">Recall {{ "%.1f"|format(metrics.recall * 100) }}%</div>
+                        <div class="floating-chip chip-two">Threshold {{ "%.0f"|format(threshold * 100) }}%</div>
+                    </div>
+                </div>
+
+                <div class="metric-grid">
+                    <article class="metric-card">
+                        <div class="metric-icon blue">F1</div>
+                        <div>
+                            <p>F1 validation croisée</p>
+                            <strong>{{ "%.3f"|format(metrics.f1_cv) }}</strong>
+                            <span>Critère de sélection</span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-icon green">R</div>
+                        <div>
+                            <p>Recall final</p>
+                            <strong>{{ "%.1f"|format(metrics.recall * 100) }}%</strong>
+                            <span>Churners détectés</span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-icon purple">AUC</div>
+                        <div>
+                            <p>ROC-AUC</p>
+                            <strong>{{ "%.3f"|format(metrics.roc_auc) }}</strong>
+                            <span>Jeu de test</span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-icon amber">T</div>
+                        <div>
+                            <p>Seuil opérationnel</p>
+                            <strong>{{ "%.0f"|format(threshold * 100) }}%</strong>
+                            <span>Optimisé sur OOF</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="dashboard-grid">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <p class="eyebrow">WORKFLOW</p>
+                                <h3>Pipeline de décision</h3>
+                            </div>
+                        </div>
+
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <span>01</span>
+                                <div>
+                                    <strong>Données client</strong>
+                                    <p>Profil, services, contrat et facturation.</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span>02</span>
+                                <div>
+                                    <strong>Pipeline ML</strong>
+                                    <p>Prétraitement et Logistic Regression.</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span>03</span>
+                                <div>
+                                    <strong>Score de risque</strong>
+                                    <p>Probabilité de churn calculée par le modèle.</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span>04</span>
+                                <div>
+                                    <strong>Action métier</strong>
+                                    <p>Priorisation selon le seuil optimisé à {{ "%.0f"|format(threshold * 100) }}%.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <p class="eyebrow">MODEL SNAPSHOT</p>
+                                <h3>Performance finale</h3>
+                            </div>
+                        </div>
+
+                        <div class="score-list">
+                            <div class="score-row">
+                                <div>
+                                    <span>Accuracy</span>
+                                    <strong>{{ "%.1f"|format(metrics.accuracy * 100) }}%</strong>
+                                </div>
+                                <div class="score-track"><i style="width: {{ metrics.accuracy * 100 }}%"></i></div>
+                            </div>
+
+                            <div class="score-row">
+                                <div>
+                                    <span>Precision</span>
+                                    <strong>{{ "%.1f"|format(metrics.precision * 100) }}%</strong>
+                                </div>
+                                <div class="score-track"><i style="width: {{ metrics.precision * 100 }}%"></i></div>
+                            </div>
+
+                            <div class="score-row">
+                                <div>
+                                    <span>Recall</span>
+                                    <strong>{{ "%.1f"|format(metrics.recall * 100) }}%</strong>
+                                </div>
+                                <div class="score-track"><i style="width: {{ metrics.recall * 100 }}%"></i></div>
+                            </div>
+
+                            <div class="score-row">
+                                <div>
+                                    <span>F1-score</span>
+                                    <strong>{{ "%.1f"|format(metrics.f1 * 100) }}%</strong>
+                                </div>
+                                <div class="score-track"><i style="width: {{ metrics.f1 * 100 }}%"></i></div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="page" id="page-prediction">
+                <div class="section-intro">
+                    <div>
+                        <p class="eyebrow">INDIVIDUAL SCORING</p>
+                        <h3>Analyse d'un client</h3>
+                        <p>Complétez le profil. Le backend Python applique exactement le pipeline sauvegardé dans votre fichier joblib.</p>
+                    </div>
+                    <div class="threshold-pill">
+                        Seuil de décision
+                        <strong>{{ "%.0f"|format(threshold * 100) }}%</strong>
+                    </div>
+                </div>
+
+                <form id="predictionForm" class="prediction-layout">
+                    <div class="form-column">
+                        <article class="panel form-section">
+                            <div class="section-number">01</div>
+                            <div class="panel-heading">
+                                <div>
+                                    <p class="eyebrow">PROFIL</p>
+                                    <h3>Informations client</h3>
+                                </div>
+                            </div>
+
+                            <div class="field-grid">
+                                <label class="field">
+                                    <span>Genre</span>
+                                    <select name="gender">
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Senior Citizen</span>
+                                    <select name="SeniorCitizen">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Partenaire</span>
+                                    <select name="Partner">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Personnes à charge</span>
+                                    <select name="Dependents">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field field-wide">
+                                    <div class="field-label-row">
+                                        <span>Ancienneté</span>
+                                        <output id="tenureOutput">12 mois</output>
+                                    </div>
+                                    <input type="range" name="tenure" id="tenure" min="0" max="72" value="12">
+                                </label>
+                            </div>
+                        </article>
+
+                        <article class="panel form-section">
+                            <div class="section-number">02</div>
+                            <div class="panel-heading">
+                                <div>
+                                    <p class="eyebrow">SERVICES</p>
+                                    <h3>Services souscrits</h3>
+                                </div>
+                            </div>
+
+                            <div class="field-grid">
+                                <label class="field">
+                                    <span>Service téléphonique</span>
+                                    <select name="PhoneService" id="phoneService">
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Lignes multiples</span>
+                                    <select name="MultipleLines" id="multipleLines">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field field-wide">
+                                    <span>Service Internet</span>
+                                    <select name="InternetService" id="internetService">
+                                        <option value="DSL">DSL</option>
+                                        <option value="Fiber optic">Fiber optic</option>
+                                        <option value="No">No internet</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Sécurité en ligne</span>
+                                    <select name="OnlineSecurity">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Sauvegarde en ligne</span>
+                                    <select name="OnlineBackup">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Protection appareil</span>
+                                    <select name="DeviceProtection">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Support technique</span>
+                                    <select name="TechSupport">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Streaming TV</span>
+                                    <select name="StreamingTV">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+
+                                <label class="field internet-dependent">
+                                    <span>Streaming Movies</span>
+                                    <select name="StreamingMovies">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </article>
+
+                        <article class="panel form-section">
+                            <div class="section-number">03</div>
+                            <div class="panel-heading">
+                                <div>
+                                    <p class="eyebrow">CONTRAT</p>
+                                    <h3>Facturation & paiement</h3>
+                                </div>
+                            </div>
+
+                            <div class="field-grid">
+                                <label class="field">
+                                    <span>Type de contrat</span>
+                                    <select name="Contract">
+                                        <option value="Month-to-month">Month-to-month</option>
+                                        <option value="One year">One year</option>
+                                        <option value="Two year">Two year</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Facturation électronique</span>
+                                    <select name="PaperlessBilling">
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </label>
+
+                                <label class="field field-wide">
+                                    <span>Méthode de paiement</span>
+                                    <select name="PaymentMethod">
+                                        <option value="Electronic check">Electronic check</option>
+                                        <option value="Mailed check">Mailed check</option>
+                                        <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                                        <option value="Credit card (automatic)">Credit card (automatic)</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span>Frais mensuels</span>
+                                    <div class="input-with-unit">
+                                        <input type="number" name="MonthlyCharges" value="70" min="0" step="0.01" required>
+                                        <small>$</small>
+                                    </div>
+                                </label>
+
+                                <label class="field">
+                                    <span>Frais totaux</span>
+                                    <div class="input-with-unit">
+                                        <input type="number" name="TotalCharges" value="840" min="0" step="0.01" required>
+                                        <small>$</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </article>
+
+                        <button class="primary-btn submit-btn" type="submit" id="predictButton">
+                            <span class="button-text">Calculer le risque de churn</span>
+                            <span class="button-loader"></span>
+                        </button>
+                    </div>
+
+                    <aside class="result-column">
+                        <div class="result-sticky">
+                            <article class="panel result-placeholder" id="resultPlaceholder">
+                                <div class="placeholder-icon">◎</div>
+                                <h3>Prêt pour l'analyse</h3>
+                                <p>
+                                    Complétez le formulaire puis lancez la prédiction.
+                                    Le résultat apparaîtra ici.
+                                </p>
+                            </article>
+
+                            <article class="panel result-card hidden" id="resultCard">
+                                <div class="result-header">
+                                    <div>
+                                        <p class="eyebrow">RISK ASSESSMENT</p>
+                                        <h3>Résultat de l'analyse</h3>
+                                    </div>
+                                    <span class="risk-badge" id="riskBadge">—</span>
+                                </div>
+
+                                <div class="gauge-wrap">
+                                    <div class="gauge" id="riskGauge">
+                                        <div class="gauge-inner">
+                                            <span id="probabilityValue">0%</span>
+                                            <small>probabilité</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="decision-row">
+                                    <div>
+                                        <span>Décision</span>
+                                        <strong id="decisionValue">—</strong>
+                                    </div>
+                                    <div>
+                                        <span>Seuil</span>
+                                        <strong>{{ "%.0f"|format(threshold * 100) }}%</strong>
+                                    </div>
+                                </div>
+
+                                <div class="recommendation-box">
+                                    <span>Action recommandée</span>
+                                    <p id="recommendationText"></p>
+                                </div>
+
+                                <div class="driver-section">
+                                    <div class="driver-title">
+                                        <h4>Facteurs principaux</h4>
+                                        <span>explication locale</span>
+                                    </div>
+
+                                    <div class="driver-columns">
+                                        <div>
+                                            <p class="driver-label positive">Vers le churn</p>
+                                            <div id="positiveDrivers" class="driver-list"></div>
+                                        </div>
+                                        <div>
+                                            <p class="driver-label negative">Vers la rétention</p>
+                                            <div id="negativeDrivers" class="driver-list"></div>
+                                        </div>
+                                    </div>
+
+                                    <p class="explain-note">
+                                        Les contributions expliquent le score de la Logistic Regression.
+                                        Elles ne représentent pas des relations causales.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                    </aside>
+                </form>
+            </section>
+
+            <section class="page" id="page-batch">
+                <div class="section-intro">
+                    <div>
+                        <p class="eyebrow">BATCH SCORING</p>
+                        <h3>Analyser un portefeuille de clients</h3>
+                        <p>Importez un CSV contenant les mêmes variables que le dataset d'entraînement.</p>
+                    </div>
+                </div>
+
+                <article class="panel upload-panel">
+                    <form id="batchForm">
+                        <label class="drop-zone" for="csvFile" id="dropZone">
+                            <input type="file" id="csvFile" name="file" accept=".csv" hidden>
+                            <div class="upload-icon">⇧</div>
+                            <h3>Déposez votre fichier CSV ici</h3>
+                            <p>ou cliquez pour parcourir vos fichiers</p>
+                            <span id="fileName">Aucun fichier sélectionné</span>
+                        </label>
+
+                        <button class="primary-btn" id="batchButton" type="submit">
+                            Lancer le scoring
+                        </button>
+                    </form>
+                </article>
+
+                <div class="batch-results hidden" id="batchResults">
+                    <div class="metric-grid compact">
+                        <article class="metric-card">
+                            <div class="metric-icon blue">N</div>
+                            <div>
+                                <p>Clients analysés</p>
+                                <strong id="batchTotal">0</strong>
+                                <span>lignes scorées</span>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-icon amber">!</div>
+                            <div>
+                                <p>Clients à risque</p>
+                                <strong id="batchRisk">0</strong>
+                                <span>score ≥ seuil</span>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-icon purple">%</div>
+                            <div>
+                                <p>Taux d'alerte</p>
+                                <strong id="batchRate">0%</strong>
+                                <span>du portefeuille</span>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-icon green">Ø</div>
+                            <div>
+                                <p>Risque moyen</p>
+                                <strong id="batchAverage">0%</strong>
+                                <span>probabilité moyenne</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-heading table-heading">
+                            <div>
+                                <p class="eyebrow">TOP RISK</p>
+                                <h3>Clients prioritaires</h3>
+                            </div>
+                            <button class="secondary-btn" id="downloadCsv" type="button">
+                                Télécharger les résultats
+                            </button>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table id="batchTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="page" id="page-model">
+                <div class="section-intro">
+                    <div>
+                        <p class="eyebrow">MODEL CARD</p>
+                        <h3>Performance & méthodologie</h3>
+                        <p>Résumé transparent du modèle utilisé par l'application.</p>
+                    </div>
+                </div>
+
+                <div class="model-grid">
+                    <article class="panel">
+                        <p class="eyebrow">FINAL MODEL</p>
+                        <h3>Logistic Regression</h3>
+                        <p class="body-copy">
+                            Sélectionnée à partir du F1-score moyen en validation croisée.
+                            Le test final n'est pas utilisé pour choisir le modèle.
+                        </p>
+
+                        <div class="technical-list">
+                            <div><span>F1 CV</span><strong>{{ "%.3f"|format(metrics.f1_cv) }}</strong></div>
+                            <div><span>Threshold</span><strong>{{ "%.2f"|format(threshold) }}</strong></div>
+                            <div><span>ROC-AUC</span><strong>{{ "%.3f"|format(metrics.roc_auc) }}</strong></div>
+                            <div><span>PR-AUC</span><strong>{{ "%.3f"|format(metrics.pr_auc) }}</strong></div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <p class="eyebrow">BUSINESS TRADE-OFF</p>
+                        <h3>Pourquoi un seuil à {{ "%.0f"|format(threshold * 100) }}% ?</h3>
+                        <p class="body-copy">
+                            Dans un problème de churn, manquer un client réellement à risque
+                            peut coûter plus cher qu'un contact de rétention inutile.
+                        </p>
+
+                        <div class="callout">
+                            <strong>Recall final : {{ "%.1f"|format(metrics.recall * 100) }}%</strong>
+                            <p>
+                                Le modèle identifie environ trois churners sur quatre,
+                                au prix d'une précision plus faible.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="metric-grid">
+                    <article class="metric-card">
+                        <div class="metric-icon blue">A</div>
+                        <div><p>Accuracy</p><strong>{{ "%.1f"|format(metrics.accuracy * 100) }}%</strong><span>test final</span></div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-icon purple">P</div>
+                        <div><p>Precision</p><strong>{{ "%.1f"|format(metrics.precision * 100) }}%</strong><span>classe Yes</span></div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-icon green">R</div>
+                        <div><p>Recall</p><strong>{{ "%.1f"|format(metrics.recall * 100) }}%</strong><span>classe Yes</span></div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-icon amber">F1</div>
+                        <div><p>F1-score</p><strong>{{ "%.1f"|format(metrics.f1 * 100) }}%</strong><span>classe Yes</span></div>
+                    </article>
+                </div>
+
+                <article class="panel methodology-panel">
+                    <p class="eyebrow">METHODOLOGY</p>
+                    <h3>Workflow anti-data-leakage</h3>
+
+                    <div class="method-steps">
+                        <div><span>1</span><strong>Split stratifié</strong><p>Train / Test séparés en amont.</p></div>
+                        <div><span>2</span><strong>Pipeline</strong><p>Prétraitement appris uniquement sur le train.</p></div>
+                        <div><span>3</span><strong>GridSearchCV</strong><p>Comparaison des modèles en validation croisée.</p></div>
+                        <div><span>4</span><strong>OOF threshold</strong><p>Seuil optimisé sans utiliser le test.</p></div>
+                        <div><span>5</span><strong>Final test</strong><p>Évaluation finale unique sur données non vues.</p></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="page" id="page-about">
+                <div class="section-intro">
+                    <div>
+                        <p class="eyebrow">ABOUT</p>
+                        <h3>À propos de ChurnGuard</h3>
+                        <p>Une interface web séparée du modèle pour une architecture plus réaliste.</p>
+                    </div>
+                </div>
+
+                <div class="about-grid">
+                    <article class="panel">
+                        <h3>Architecture</h3>
+                        <div class="architecture-flow">
+                            <div><span>Frontend</span><strong>HTML / CSS / JavaScript</strong></div>
+                            <i>→</i>
+                            <div><span>API</span><strong>Flask / Python</strong></div>
+                            <i>→</i>
+                            <div><span>ML</span><strong>Scikit-learn / Joblib</strong></div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <h3>Objectif</h3>
+                        <p class="body-copy">
+                            Transformer un notebook de Machine Learning en une application
+                            exploitable par un utilisateur non technique, tout en conservant
+                            le pipeline d'entraînement et le seuil optimisé.
+                        </p>
+                    </article>
+
+                    <article class="panel">
+                        <h3>Limites</h3>
+                        <p class="body-copy">
+                            Le score est une estimation statistique. Une probabilité élevée ne
+                            signifie pas qu'un client quittera nécessairement l'entreprise.
+                            L'application est un outil d'aide à la décision.
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <footer>
+                <span>ChurnGuard AI • Customer Churn Prediction</span>
+                <span>HTML • CSS • JavaScript • Flask • Scikit-learn</span>
+            </footer>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        window.APP_CONFIG = {
+            threshold: {{ threshold|tojson }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
