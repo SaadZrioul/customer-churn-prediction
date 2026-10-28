@@ -269,9 +269,15 @@ cd customer-churn-prediction
 ```
 
 ### 2. Créer un environnement virtuel
-
+Cette commande fonctionne sous Windows, Linux et macOS :
 ```bash
 python -m venv .venv
+```
+
+Selon le système, il peut être nécessaire d'utiliser python3 :
+
+```bash
+python3 -m venv .venv
 ```
 
 ### 3. Activer l'environnement virtuel
@@ -293,6 +299,17 @@ puis :
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
+#### Windows CMD
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+#### Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
 
 Une fois activé, le terminal doit afficher :
 
@@ -306,13 +323,25 @@ Une fois activé, le terminal doit afficher :
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+Sous certains systèmes Linux/macOS :
+
+```bash
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+```
 
 ### 5. Lancer l'interface de démonstration
 
-Exécuter :
+Windows :
 
 ```bash
 python app.py
+```
+
+Linux / macOS si `python` n'est pas disponible :
+
+```bash
+python3 app.py
 ```
 
 Puis ouvrir dans le navigateur :
