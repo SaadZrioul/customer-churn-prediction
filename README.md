@@ -256,45 +256,60 @@ Customer-Churn-Project/
 
 ## Installation
 
-Cloner le projet :
+### 1. Cloner le projet
 
 ```bash
 git clone https://github.com/SaadZrioul/customer-churn-prediction.git
 ```
 
-Accéder au dossier :
+Accéder au dossier du projet :
 
 ```bash
 cd customer-churn-prediction
 ```
 
-Créer un environnement virtuel :
+### 2. Créer un environnement virtuel
 
 ```bash
 python -m venv .venv
 ```
 
-Sous Windows, activer l'environnement :
+### 3. Activer l'environnement virtuel
 
-```bash
-.venv\Scripts\activate
+Sous Windows PowerShell :
+
+```powershell
+.\.venv\Scripts\Activate.ps1
 ```
 
-Installer les dépendances :
+Si PowerShell bloque l'exécution du script, exécuter d'abord :
 
-```bash
-pip install -r requirements.txt
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
-Ensuite, ouvrir le notebook :
+puis :
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Une fois activé, le terminal doit afficher :
 
 ```text
-customer_churn_NB_finale.ipynb
+(.venv) PS C:\...\customer-churn-prediction>
 ```
 
-### Exécution de l'interface de démonstration
+### 4. Installer les dépendances
 
-Lancer l'application Flask :
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 5. Lancer l'interface de démonstration
+
+Exécuter :
 
 ```bash
 python app.py
@@ -306,7 +321,29 @@ Puis ouvrir dans le navigateur :
 http://127.0.0.1:5000
 ```
 
----
+### 6. Ouvrir le notebook
+
+Le notebook contient le développement complet du modèle Machine Learning.
+
+Pour ouvrir tout le projet dans VS Code :
+
+```bash
+code .
+```
+
+Ou directement le notebook :
+
+```bash
+code customer_churn_NB.ipynb
+```
+
+Dans VS Code, sélectionner ensuite l'environnement Python `.venv` comme kernel du notebook.
+
+Si nécessaire, installer le support Jupyter dans l'environnement :
+
+```bash
+python -m pip install ipykernel
+```
 
 ## Dépendances principales
 
