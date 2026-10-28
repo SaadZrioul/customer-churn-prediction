@@ -231,7 +231,7 @@ d'identifier efficacement les clients susceptibles de quitter l'entreprise.
 ## Structure du projet
 
 ```text
-Customer-Churn-Project/
+customer-churn-prediction/
 │
 ├── app.py
 ├── customer_churn_NB.ipynb
@@ -373,6 +373,7 @@ Si nécessaire, installer le support Jupyter dans l'environnement :
 ```bash
 python -m pip install ipykernel
 ```
+---
 
 ## Dépendances principales
 
@@ -386,6 +387,7 @@ scipy==1.14.1
 matplotlib==3.9.2
 seaborn==0.13.2
 joblib==1.4.2
+Flask==3.1.2
 ```
 
 ---
@@ -431,7 +433,7 @@ Si :
 P(Churn) >= 0.30
 ```
 
-le client est considéré comme présentant un risque élevé de churn.
+le client est considéré comme à risque de churn (Churn = Yes).
 
 ---
 
